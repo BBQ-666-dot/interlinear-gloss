@@ -8,6 +8,7 @@ import { parseGlossResponse, parseSucceeded } from '../src/gloss/parser';
 import { resolveGlossary, checkGlossaryUsage, glossaryVersion } from '../src/gloss/glossary';
 import { generateGloss, isUsefulItem, missingCandidates, pickCandidates } from '../src/gloss/engine';
 import { buildTranslationPrompt, buildGlossaryPrompt } from '../src/gloss/prompt';
+import { lookupOfflineWord, offlineDictionarySize } from '../src/dictionary/offline';
 import { createProvider } from '../src/providers/provider';
 import { FetchTransport } from '../src/providers/transport';
 import { DEFAULT_SETTINGS } from '../src/settings';
@@ -877,6 +878,21 @@ async function probeModel(): Promise<void> {
 	}
 }
 
+function testOfflineDictionary(): void {
+	assert('离线词典已加载', offlineDictionarySize() > 30000, `${offlineDictionarySize()} entries`);
+	const obtain = lookupOfflineWord('obtain');
+	assert('obtain 命中“获得”', Boolean(obtain?.translation.includes('获得')), obtain?.translation ?? '');
+	const contents = lookupOfflineWord('contents');
+	assert('contents 首义是“内容”', Boolean(contents?.translation.startsWith('内容')), contents?.translation ?? '');
+	const chapters = lookupOfflineWord('chapters');
+	assert('chapters 含“章节”', Boolean(chapters?.translation.includes('章节')), chapters?.translation ?? '');
+	const correlated = lookupOfflineWord('correlated');
+	assert('correlated 是形容词释义', Boolean(correlated?.translation.includes('相互')), correlated?.translation ?? '');
+	const obtained = lookupOfflineWord('obtained');
+	assert('obtained 词形还原到 obtain', Boolean(obtained?.translation.includes('获得')), obtained?.translation ?? '');
+	assert('未收录词返回 null', lookupOfflineWord('zzzznotaword') === null);
+}
+
 async function main(): Promise<void> {
 	if (process.env.IG_PROBE === '1') {
 		await probeModel();
@@ -895,6 +911,7 @@ async function main(): Promise<void> {
 	testSelectionSnap();
 	await testMarks();
 	testWordPrompt();
+	testOfflineDictionary();
 	await testLiveOllama();
 
 	console.log('');

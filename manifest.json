@@ -1,7 +1,7 @@
 {
 	"id": "interlinear-gloss",
 	"name": "Interlinear Gloss",
-	"version": "0.3.2",
+	"version": "0.4.0",
 	"minAppVersion": "1.5.0",
 	"description": "选中英文句子或段落，生成中文译文与关键词释义，永久保存在原文下方；PDF 用右侧栏加 sidecar 缓存。",
 	"author": "bbq25",

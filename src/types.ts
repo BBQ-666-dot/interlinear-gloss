@@ -90,6 +90,8 @@ export interface GlossSettings {
 
 	/** Word-level PDF marks. */
 	pdfMarksEnabled: boolean;
+	offlineDictionaryEnabled: boolean;
+	offlineDictionaryFallback: boolean;
 	pdfMarkModel: string;
 	pdfMarkLabelMode: MarkLabelMode;
 	pdfMarkFontScale: number;

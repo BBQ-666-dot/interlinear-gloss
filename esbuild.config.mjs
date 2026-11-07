@@ -10,6 +10,7 @@ const shared = {
 	target: 'es2018',
 	sourcemap: production ? false : 'inline',
 	minify: production,
+	loader: { '.tsv': 'text' },
 };
 
 async function buildPlugin() {
@@ -34,6 +35,7 @@ async function buildTests() {
 		alias: { obsidian: './test/obsidian-stub.ts' },
 		sourcemap: 'inline',
 		logLevel: 'info',
+		loader: { '.tsv': 'text' },
 	});
 }
 

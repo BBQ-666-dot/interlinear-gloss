@@ -423,8 +423,28 @@ export class GlossSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('词标注模型')
-			.setDesc('单词释义只输出一行，qwen2.5:3b 足够；留空则用上面的「词义模型」。')
+			.setName('优先使用离线英汉词典')
+			.setDesc('内置 ECDICT 精简词库（约 3.7 万常用词，MIT）；命中时不请求模型，直接给出多条中文释义。')
+			.addToggle((toggle) =>
+				toggle.setValue(settings.offlineDictionaryEnabled).onChange(async (value) => {
+					settings.offlineDictionaryEnabled = value;
+					await this.persist();
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName('词典未收录时用模型补')
+			.setDesc('关闭后，词典查不到的词只提示“未收录”，不会再把生词交给模型猜。')
+			.addToggle((toggle) =>
+				toggle.setValue(settings.offlineDictionaryFallback).onChange(async (value) => {
+					settings.offlineDictionaryFallback = value;
+					await this.persist();
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName('词标注模型（仅兜底）')
+			.setDesc('只有词典未收录且允许模型兜底时才用；留空则用上面的「词义模型」。')
 			.addText((text) =>
 				text
 					.setPlaceholder('qwen2.5:3b')

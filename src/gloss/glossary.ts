@@ -10,6 +10,7 @@ export const DEFAULT_GLOSSARY: Record<string, string> = {
 	'action value': '动作值',
 	reward: '奖励',
 	return: '回报',
+	obtain: '获得',
 	episode: '回合',
 	trajectory: '轨迹',
 	'Bellman equation': '贝尔曼方程',

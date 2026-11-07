@@ -19,6 +19,8 @@ import { shortHash, normalizeForHash } from './cache/hash';
 import { generateGloss } from './gloss/engine';
 import type { GeneratedGloss } from './gloss/engine';
 import { translateWordInContext } from './gloss/word';
+import { lookupOfflineWord } from './dictionary/offline';
+import { resolveGlossary } from './gloss/glossary';
 import { createProvider, ProviderError } from './providers/provider';
 import type { TranslationProvider } from './providers/provider';
 import { ObsidianTransport } from './providers/obsidianTransport';
@@ -1138,22 +1140,41 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 		}
 
 		const notice = new Notice(`正在查「${selection.text}」…`, 0);
-		let result: { translation: string; model: string } | null = null;
-		try {
-			result = await translateWordInContext(
-				this.getProvider(),
-				{
-					text: selection.text,
-					quoteBefore: selection.quoteBefore,
-					quoteAfter: selection.quoteAfter,
-					settings: this.settings,
-				},
-				consoleLogger,
-			);
-		} catch (error) {
-			notice.hide();
-			this.reportError(error);
-			return;
+		let result: { translation: string; model: string; pos?: string } | null = null;
+		const glossary = resolveGlossary(this.settings.customGlossary);
+		const glossaryHit = glossary[selection.text.trim().toLowerCase()];
+		if (glossaryHit) {
+			result = { translation: glossaryHit, model: '术语表' };
+		} else {
+			const offline = this.settings.offlineDictionaryEnabled ? lookupOfflineWord(selection.text) : null;
+			if (offline) {
+				result = {
+					translation: offline.translation,
+					model: 'ECDICT',
+					...(offline.pos ? { pos: offline.pos } : {}),
+				};
+			} else if (!this.settings.offlineDictionaryFallback) {
+				notice.hide();
+				new Notice(`离线词典未收录「${selection.text}」；可在设置里开启模型兜底`);
+				return;
+			} else {
+				try {
+					result = await translateWordInContext(
+						this.getProvider(),
+						{
+							text: selection.text,
+							quoteBefore: selection.quoteBefore,
+							quoteAfter: selection.quoteAfter,
+							settings: this.settings,
+						},
+						consoleLogger,
+					);
+				} catch (error) {
+					notice.hide();
+					this.reportError(error);
+					return;
+				}
+			}
 		}
 		notice.hide();
 
@@ -1164,6 +1185,7 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 			page: selection.page,
 			text: selection.text,
 			translation: result.translation,
+			...(result.pos ? { pos: result.pos } : {}),
 			rects: selection.rects,
 			quoteBefore: selection.quoteBefore,
 			quoteAfter: selection.quoteAfter,
