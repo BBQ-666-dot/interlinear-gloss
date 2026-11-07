@@ -87,6 +87,8 @@ ollama pull qwen2.5:3b
 
 - 内置 `data/dictionary.tsv` + `data/lemma.tsv`，构建时打进 `main.js`，不联网、不占显存。
 - `obtain → 获得；达到`、`contents → 内容；…`、`chapters → 章；回；章节…`；术语表（policy/return/reward 等）优先于词典。
+- 保留 ECDICT 的 `[计]/[医]/[经]` 等专业义项：`corresponding` 的候选包含“对应”，上下文会选“对应的”。
+- 形容词义项自动补“的”（`对应 → 对应的`），名词保持原形。
 - 词形变化走 lemma 表 + 后缀规则，`obtained / obtaining / chapters` 都能还原。
 - 多义词：词典给出候选，`qwen2.5:3b` 只输出最合适候选的编号（不自由翻译）；失败回退首义，结果直接缓存。
 - 词典未收录时：默认允许模型兜底；可在设置里关掉，只提示“未收录”。

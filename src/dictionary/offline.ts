@@ -54,6 +54,16 @@ function load(): void {
 	lemmas = nextLemmas;
 }
 
+export function applyAdjectiveSuffix(translation: string, pos?: string): string {
+	const text = translation.trim();
+	if (!text || !/^(a|ad|adj)$/i.test(pos ?? '')) return text;
+	if (/[的地得]$/.test(text)) return text;
+	// A bare adjective sense from a domain line ("对应" from [计]) needs the
+	// adjective marker; multi-word/phrasal senses already carry their own form.
+	if (/^[\u4e00-\u9fff]{1,8}$/.test(text)) return `${text}的`;
+	return text;
+}
+
 export function normalizeDictionaryWord(raw: string): string {
 	return raw
 		.trim()

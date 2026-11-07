@@ -19,7 +19,7 @@ import { shortHash, normalizeForHash } from './cache/hash';
 import { generateGloss } from './gloss/engine';
 import type { GeneratedGloss } from './gloss/engine';
 import { translateWordInContext } from './gloss/word';
-import { lookupOfflineWord } from './dictionary/offline';
+import { applyAdjectiveSuffix, lookupOfflineWord } from './dictionary/offline';
 import { chooseOfflineSense } from './dictionary/sense';
 import { resolveGlossary } from './gloss/glossary';
 import { createProvider, ProviderError } from './providers/provider';
@@ -1162,16 +1162,18 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 						consoleLogger,
 					);
 					if (chosen) {
-						translation = chosen.translation;
+						translation = applyAdjectiveSuffix(chosen.translation, offline.pos);
 						model = 'ECDICT+AI';
 					} else {
 						// Constrained selection failed: keep a dictionary sense rather
 						// than falling back to an unconstrained model translation.
-						translation = offline.candidates[0] ?? offline.translation;
+						translation = applyAdjectiveSuffix(offline.candidates[0] ?? offline.translation, offline.pos);
 					}
 				} else if (offline.candidates.length > 1) {
 					// AI selection is off: keep the whole dictionary entry.
 					translation = offline.translation;
+				} else {
+					translation = applyAdjectiveSuffix(offline.translation, offline.pos);
 				}
 				result = {
 					translation,

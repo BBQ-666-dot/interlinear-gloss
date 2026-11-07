@@ -1,6 +1,6 @@
 {
   "name": "interlinear-gloss",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Persistent bilingual translations and word glosses below selected text (Obsidian plugin).",
   "author": "bbq25",
   "repository": {
