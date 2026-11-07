@@ -88,6 +88,7 @@ ollama pull qwen2.5:3b
 - 内置 `data/dictionary.tsv` + `data/lemma.tsv`，构建时打进 `main.js`，不联网、不占显存。
 - `obtain → 获得；达到`、`contents → 内容；…`、`chapters → 章；回；章节…`；术语表（policy/return/reward 等）优先于词典。
 - 词形变化走 lemma 表 + 后缀规则，`obtained / obtaining / chapters` 都能还原。
+- 多义词：词典给出候选，`qwen2.5:3b` 只输出最合适候选的编号（不自由翻译）；失败回退首义，结果直接缓存。
 - 词典未收录时：默认允许模型兜底；可在设置里关掉，只提示“未收录”。
 - 数据来源：[ECDICT](https://github.com/skywind3000/ECDICT)（MIT），详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
@@ -142,7 +143,7 @@ ollama pull qwen2.5:3b
 - 输出模式、目标语言、词条上限（默认 20）、单次输入字符上限、块内是否显示原文、「整理词义」开关（关掉只出译文）
 - 自定义术语表（`policy = 策略` 一行一条，支持 `=` `:` `|` `→` `——`）
 - PDF：词义记录默认写进 vault（`Glosses/pdf/<书名>.gloss.json`，随 vault 同步）；也可关掉改为只放 localStorage
-- PDF 词级标注：启用开关、优先离线词典、词典未收录时模型兜底、词标注模型（仅兜底）、标签位置（none/hover/gap/overlap/margin，默认 none）、字号缩放、高亮颜色与不透明度、是否显示词性、选中字符上限、标注文件位置
+- PDF 词级标注：启用开关、优先离线词典、词典未收录时模型兜底、多义词 AI 选义项、义项选择模型、词标注模型（仅兜底）、标签位置（none/hover/gap/overlap/margin，默认 none）、字号缩放、高亮颜色与不透明度、是否显示词性、选中字符上限、标注文件位置
 - 诊断：测试连接、查看模型列表、打印当前 PDF 页与缓存路径
 
 API Key 走 `app.secretStorage`（系统钥匙串），不写进 `data.json`。
@@ -152,7 +153,7 @@ API Key 走 `app.secretStorage`（系统钥匙串），不写进 `data.json`。
 ```powershell
 npm install
 npm run build      # → main.js
-npm test           # 147 项自测 + 真实 Ollama 集成测试（IG_OFFLINE=1 跳过模型用例 = 136 项）
+npm test           # 156 项自测 + 真实 Ollama 集成测试（IG_OFFLINE=1 跳过模型用例）
 npm run typecheck
 ```
 

@@ -9,6 +9,7 @@ import { resolveGlossary, checkGlossaryUsage, glossaryVersion } from '../src/glo
 import { generateGloss, isUsefulItem, missingCandidates, pickCandidates } from '../src/gloss/engine';
 import { buildTranslationPrompt, buildGlossaryPrompt } from '../src/gloss/prompt';
 import { lookupOfflineWord, offlineDictionarySize } from '../src/dictionary/offline';
+import { buildSensePrompt, parseSenseChoice } from '../src/dictionary/sense';
 import { createProvider } from '../src/providers/provider';
 import { FetchTransport } from '../src/providers/transport';
 import { DEFAULT_SETTINGS } from '../src/settings';
@@ -891,6 +892,15 @@ function testOfflineDictionary(): void {
 	const obtained = lookupOfflineWord('obtained');
 	assert('obtained 词形还原到 obtain', Boolean(obtained?.translation.includes('获得')), obtained?.translation ?? '');
 	assert('未收录词返回 null', lookupOfflineWord('zzzznotaword') === null);
+	const contentsCandidates = lookupOfflineWord('contents')?.candidates ?? [];
+	assert('contents 有多个候选', contentsCandidates.length > 1, `${contentsCandidates.length} 个`);
+	const prompt = buildSensePrompt('contents', 'The first aspect is the ', ' introduced in each chapter.', contentsCandidates);
+	assert('义项提示带编号', prompt.includes('1. ') && prompt.includes('上下文：'));
+	assert('义项提示要求只输出数字', prompt.includes('只输出一个阿拉伯数字'));
+	assert('解析义项编号', parseSenseChoice('2', contentsCandidates.length) === 2);
+	assert('容忍“答案是 3”', parseSenseChoice('答案是 3', contentsCandidates.length) === 3);
+	assert('越界编号被拒绝', parseSenseChoice('99', contentsCandidates.length) === null);
+	assert('非数字被拒绝', parseSenseChoice('内容', contentsCandidates.length) === null);
 }
 
 async function main(): Promise<void> {

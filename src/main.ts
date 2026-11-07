@@ -20,6 +20,7 @@ import { generateGloss } from './gloss/engine';
 import type { GeneratedGloss } from './gloss/engine';
 import { translateWordInContext } from './gloss/word';
 import { lookupOfflineWord } from './dictionary/offline';
+import { chooseOfflineSense } from './dictionary/sense';
 import { resolveGlossary } from './gloss/glossary';
 import { createProvider, ProviderError } from './providers/provider';
 import type { TranslationProvider } from './providers/provider';
@@ -1148,9 +1149,33 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 		} else {
 			const offline = this.settings.offlineDictionaryEnabled ? lookupOfflineWord(selection.text) : null;
 			if (offline) {
+				let translation = offline.translation;
+				let model = 'ECDICT';
+				if (offline.candidates.length > 1 && this.settings.offlineSenseSelection) {
+					const chosen = await chooseOfflineSense(
+						this.getProvider(),
+						this.settings,
+						selection.text,
+						selection.quoteBefore,
+						selection.quoteAfter,
+						offline.candidates,
+						consoleLogger,
+					);
+					if (chosen) {
+						translation = chosen.translation;
+						model = 'ECDICT+AI';
+					} else {
+						// Constrained selection failed: keep a dictionary sense rather
+						// than falling back to an unconstrained model translation.
+						translation = offline.candidates[0] ?? offline.translation;
+					}
+				} else if (offline.candidates.length > 1) {
+					// AI selection is off: keep the whole dictionary entry.
+					translation = offline.translation;
+				}
 				result = {
-					translation: offline.translation,
-					model: 'ECDICT',
+					translation,
+					model,
 					...(offline.pos ? { pos: offline.pos } : {}),
 				};
 			} else if (!this.settings.offlineDictionaryFallback) {

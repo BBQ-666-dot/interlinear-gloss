@@ -92,7 +92,9 @@ export interface GlossSettings {
 	pdfMarksEnabled: boolean;
 	offlineDictionaryEnabled: boolean;
 	offlineDictionaryFallback: boolean;
+	offlineSenseSelection: boolean;
 	pdfMarkModel: string;
+	pdfMarkSenseModel: string;
 	pdfMarkLabelMode: MarkLabelMode;
 	pdfMarkFontScale: number;
 	pdfMarkColor: MarkColor;

@@ -11,6 +11,7 @@ import lemmaText from '../../data/lemma.tsv';
 
 export interface OfflineLookup {
 	translation: string;
+	candidates: string[];
 	pos?: string;
 	source: 'ECDICT';
 	matched: string;
@@ -62,8 +63,13 @@ export function normalizeDictionaryWord(raw: string): string {
 }
 
 function resultFor(word: string, entry: DictEntry): OfflineLookup {
+	const candidates = entry.translation
+		.split('；')
+		.map((item) => item.trim())
+		.filter(Boolean);
 	return {
-		translation: entry.translation,
+		translation: candidates.join('；'),
+		candidates,
 		...(entry.pos ? { pos: entry.pos } : {}),
 		source: 'ECDICT',
 		matched: word,

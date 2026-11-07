@@ -443,6 +443,29 @@ export class GlossSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
+			.setName('多义词用 AI 选义项')
+			.setDesc('词典有多个候选义项时，让义项模型只输出最合适的一项编号；单义词不调用模型。')
+			.addToggle((toggle) =>
+				toggle.setValue(settings.offlineSenseSelection).onChange(async (value) => {
+					settings.offlineSenseSelection = value;
+					await this.persist();
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName('义项选择模型')
+			.setDesc('只做“从候选里选编号”，推荐 qwen2.5:3b；留空则用「词义模型」。')
+			.addText((text) =>
+				text
+					.setPlaceholder('qwen2.5:3b')
+					.setValue(settings.pdfMarkSenseModel)
+					.onChange(async (value) => {
+						settings.pdfMarkSenseModel = value.trim();
+						await this.persist();
+					}),
+			);
+
+		new Setting(containerEl)
 			.setName('词标注模型（仅兜底）')
 			.setDesc('只有词典未收录且允许模型兜底时才用；留空则用上面的「词义模型」。')
 			.addText((text) =>
