@@ -1,0 +1,3 @@
+# Interlinear Gloss
+
+Initializing repository...
