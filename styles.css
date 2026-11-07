@@ -1,0 +1,518 @@
+/* Interlinear Gloss — shared styles for rendered blocks, PDF sidebar and settings */
+
+.ig-host {
+	margin: 0.75em 0 1em;
+}
+
+.ig-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background: var(--background-secondary);
+	padding: 12px 14px;
+}
+
+.ig-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.ig-title {
+	font-size: var(--font-ui-small);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--text-normal);
+}
+
+.ig-meta {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.ig-label {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	margin-right: 4px;
+}
+
+.ig-source {
+	margin-bottom: 6px;
+}
+
+.ig-source-text {
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	font-style: italic;
+	line-height: 1.6;
+}
+
+.ig-translation {
+	margin-bottom: 4px;
+}
+
+.ig-translation-text {
+	font-size: var(--font-text-size);
+	line-height: 1.75;
+	color: var(--text-normal);
+}
+
+.ig-table-wrap {
+	overflow-x: auto;
+	margin-top: 8px;
+}
+
+.ig-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--font-ui-small);
+}
+
+.ig-table th {
+	text-align: left;
+	font-weight: 600;
+	color: var(--text-muted);
+	padding: 4px 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	white-space: nowrap;
+}
+
+.ig-table td {
+	padding: 4px 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	vertical-align: top;
+	line-height: 1.5;
+}
+
+.ig-table tr:last-child td {
+	border-bottom: none;
+}
+
+.ig-src {
+	font-family: var(--font-monospace);
+	color: var(--text-accent);
+	white-space: nowrap;
+}
+
+.ig-pos {
+	color: var(--text-faint);
+	font-style: italic;
+	white-space: nowrap;
+}
+
+.ig-note {
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+}
+
+.ig-table-wrap.is-compact .ig-table {
+	font-size: var(--font-ui-smaller);
+}
+
+.ig-empty,
+.ig-warn {
+	margin-top: 8px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.ig-warn {
+	color: var(--text-warning);
+}
+
+.ig-actions {
+	display: flex;
+	gap: 6px;
+	margin-top: 10px;
+	opacity: 0.35;
+	transition: opacity 120ms ease-in-out;
+}
+
+.ig-card:hover .ig-actions,
+.ig-actions:focus-within {
+	opacity: 1;
+}
+
+.ig-btn {
+	font-size: var(--font-ui-smaller);
+	padding: 2px 8px;
+	height: auto;
+}
+
+.ig-btn-primary {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.ig-btn-remove,
+.ig-icon-btn.is-danger {
+	color: var(--text-error);
+}
+
+.ig-error {
+	border: 1px solid var(--text-error);
+	border-radius: var(--radius-m);
+	padding: 10px 12px;
+	background: var(--background-secondary);
+}
+
+.ig-error-title {
+	font-weight: 600;
+	color: var(--text-error);
+	margin-bottom: 4px;
+}
+
+.ig-error-body {
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	margin-bottom: 6px;
+}
+
+.ig-error-raw {
+	max-height: 180px;
+	overflow: auto;
+	font-size: var(--font-ui-smaller);
+	background: var(--background-primary);
+	padding: 8px;
+	border-radius: var(--radius-s);
+}
+
+/* Strict interlinear layout: word above, meaning below, one token per word. */
+
+.ig-interlinear {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 8px;
+	margin-top: 10px;
+	line-height: 1.3;
+}
+
+.ig-token {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 1.4em;
+}
+
+.ig-token .ig-en {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-normal);
+}
+
+.ig-token .ig-zh {
+	font-size: 0.78em;
+	color: var(--text-faint);
+	border-top: 1px solid var(--background-modifier-border);
+	padding-top: 1px;
+	margin-top: 2px;
+}
+
+.ig-token.ig-hit .ig-zh {
+	color: var(--text-accent);
+}
+
+.ig-gap {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	align-self: flex-start;
+}
+
+/* PDF sidebar */
+
+.ig-sidebar {
+	padding: 4px 10px 24px;
+}
+
+.ig-sb-head {
+	padding-bottom: 8px;
+	margin-bottom: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.ig-sb-title {
+	font-size: var(--font-ui-medium);
+	font-weight: 600;
+	word-break: break-all;
+}
+
+.ig-sb-hint {
+	margin-top: 2px;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.ig-sb-actions {
+	display: flex;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.ig-sb-manual {
+	margin: 8px 0 14px;
+}
+
+.ig-sb-textarea {
+	width: 100%;
+	min-height: 68px;
+	resize: vertical;
+	font-size: var(--font-ui-small);
+}
+
+.ig-sb-row {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 6px;
+}
+
+.ig-sb-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.ig-sb-count,
+.ig-sb-empty {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+}
+
+.ig-sb-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	padding: 8px 10px;
+	background: var(--background-secondary);
+}
+
+.ig-sb-card-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.ig-sb-page {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-accent);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: 0 4px;
+}
+
+.ig-sb-model {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-faint);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+}
+
+.ig-sb-tools {
+	margin-left: auto;
+	display: flex;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.ig-icon-btn {
+	font-size: var(--font-ui-smaller);
+	padding: 1px 6px;
+	height: auto;
+	background: transparent;
+	box-shadow: none;
+	border: none;
+	color: var(--text-muted);
+}
+
+.ig-icon-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.ig-sb-card .ig-source-text {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.ig-sb-card .ig-translation-text {
+	font-size: var(--font-ui-small);
+}
+
+.ig-sb-card .ig-actions {
+	display: none;
+}
+
+/* Settings */
+
+.ig-glossary-input {
+	width: 100%;
+	min-height: 160px;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+}
+
+.ig-modal-actions {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	margin-top: 16px;
+}
+
+/* ------------------------------------------------------------------ */
+/* PDF word marks                                                      */
+/* ------------------------------------------------------------------ */
+
+.ig-pdf-layer {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	/* Above pdf.js's text layer (z-index 2) so labels are never washed out. */
+	z-index: 6;
+	overflow: visible;
+}
+
+.ig-pdf-mark {
+	position: absolute;
+	z-index: 1;
+	border-radius: 2px;
+	mix-blend-mode: multiply;
+	/* Never intercept the mouse: text selection in the PDF must keep working. */
+	pointer-events: none;
+	cursor: default;
+	transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.ig-pdf-mark.is-hover {
+	box-shadow: 0 0 0 1px rgba(90, 70, 0, 0.35);
+}
+
+.ig-pdf-mark.is-flash {
+	animation: ig-mark-flash 1.1s ease-out 2;
+}
+
+@keyframes ig-mark-flash {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 196, 0, 0.85);
+	}
+	100% {
+		box-shadow: 0 0 0 6px rgba(255, 196, 0, 0);
+	}
+}
+
+.ig-pdf-label {
+	position: absolute;
+	z-index: 2;
+	box-sizing: border-box;
+	pointer-events: auto;
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	line-height: 1.05;
+	color: #1f2328;
+	background: transparent;
+	border-radius: 3px;
+	padding: 0 3px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-shadow: 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+/* Readable chip when the line gap is too tight for a clean fit. */
+.ig-pdf-label.is-overlap {
+	background: rgba(255, 255, 255, 0.92);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+	text-shadow: none;
+}
+
+.ig-pdf-label.is-margin {
+	color: var(--text-normal);
+	background: var(--background-secondary);
+	box-shadow: 0 0 0 1px var(--background-modifier-border);
+	text-shadow: none;
+}
+
+.ig-pdf-label.is-hover {
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+	text-shadow: none;
+}
+
+.ig-pdf-label.is-hidden {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.ig-pdf-connector {
+	position: absolute;
+	pointer-events: none;
+	border-top: 1px dashed rgba(0, 0, 0, 0.35);
+	transform-origin: left center;
+}
+
+/* Sidebar word mark list */
+
+.ig-sb-marks {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 10px;
+	padding-top: 8px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.ig-sb-mark {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 6px 8px;
+	border-radius: 6px;
+	background: var(--background-secondary);
+}
+
+.ig-sb-mark-line {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.ig-sb-mark-word {
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.ig-sb-mark-arrow {
+	color: var(--text-faint);
+}
+
+.ig-sb-mark-trans {
+	color: var(--text-accent);
+}
+
+.ig-sb-mark-pos {
+	color: var(--text-muted);
+	font-size: 0.85em;
+}
+
+/* Word mark editor */
+
+.ig-mark-modal .ig-mark-meta {
+	color: var(--text-muted);
+	font-size: 0.9em;
+	margin-bottom: 8px;
+}
+
+.ig-mark-modal .ig-mark-input {
+	width: 100%;
+	font-size: 1.05em;
+	padding: 6px 8px;
+}
+

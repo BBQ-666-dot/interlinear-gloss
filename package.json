@@ -1,0 +1,29 @@
+{
+  "name": "interlinear-gloss",
+  "version": "0.3.2",
+  "description": "Persistent bilingual translations and word glosses below selected text (Obsidian plugin).",
+  "author": "bbq25",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BBQ-666-dot/interlinear-gloss.git"
+  },
+  "homepage": "https://github.com/BBQ-666-dot/interlinear-gloss#readme",
+  "bugs": {
+    "url": "https://github.com/BBQ-666-dot/interlinear-gloss/issues"
+  },
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit",
+    "test": "node esbuild.config.mjs test && node test/run.cjs"
+  },
+  "keywords": ["obsidian", "translation", "gloss", "ollama"],
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
+}
