@@ -332,7 +332,7 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 		this.addCommand({
 			id: 'pdf-mark-word',
 			name: 'Mark PDF word（标注 PDF 选中词）',
-			hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'a' }],
+			hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'z' }],
 			checkCallback: (checking: boolean) => {
 				const pdf = getActivePdfView(this.app);
 				if (!pdf) return false;

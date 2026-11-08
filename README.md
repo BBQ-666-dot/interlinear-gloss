@@ -27,13 +27,13 @@ ollama pull qwen2.5:3b
 | `Interlinear Gloss: 重新生成词义` | 光标在已有词义块里时重做 |
 | `Interlinear Gloss: 删除词义` | 删掉光标附近的词义块 |
 | `Interlinear Gloss: 打开 PDF 词义侧栏` | 右侧栏；可点「译选中」 |
-| `Interlinear Gloss: 标注 PDF 选中词` | 选一个词 → 高亮；默认快捷键 `Ctrl+Shift+A`（macOS `Cmd+Shift+A`） |
+| `Interlinear Gloss: 标注 PDF 选中词` | 选一个词 → 高亮；默认快捷键 `Ctrl+Shift+Z`（macOS `Cmd+Shift+Z`） |
 | `Interlinear Gloss: 编辑 PDF 标注` | 光标所在的标注（或在侧栏点标签） |
 | `Interlinear Gloss: 删除 PDF 标注` | 删掉选中的标注 |
 | `Interlinear Gloss: 显示/隐藏 PDF 标注` | 临时关掉高亮与标签 |
 | `Interlinear Gloss: 诊断` | 打印服务商/模型/PDF/缓存/标注状态 |
 
-默认快捷键只作用于「标注 PDF 选中词」：`Ctrl+Shift+A`（macOS `Cmd+Shift+A`）。如果和你的其他快捷键冲突，到「设置 → 快捷键」搜索 `Interlinear Gloss` 改成自己的组合。
+默认快捷键只作用于「标注 PDF 选中词」：`Ctrl+Shift+Z`（macOS `Cmd+Shift+Z`）。如果和「重做」等快捷键冲突，到「设置 → 快捷键」搜索 `Interlinear Gloss` 改成自己的组合。
 
 同一段文字下面已经有词义块时不会重复插入，而是弹窗问「重新生成 / 删除 / 取消」。生成过的内容直接存在笔记里，**再次打开笔记不需要任何请求**。
 
