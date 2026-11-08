@@ -101,7 +101,6 @@ export interface GlossSettings {
 	pdfMarkOpacity: number;
 	pdfMarkShowPos: boolean;
 	pdfMarkTranslateSentence: boolean;
-	pdfMarkDoubleClickSentence: boolean;
 	pdfMarkCacheInVault: boolean;
 	pdfMarkCacheFolder: string;
 }

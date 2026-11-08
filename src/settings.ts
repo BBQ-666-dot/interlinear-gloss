@@ -32,7 +32,6 @@ export const DEFAULT_SETTINGS: GlossSettings = {
 	pdfMarkOpacity: 0.9,
 	pdfMarkShowPos: false,
 	pdfMarkTranslateSentence: true,
-	pdfMarkDoubleClickSentence: true,
 	pdfMarkCacheInVault: true,
 	pdfMarkCacheFolder: 'Glosses/pdf',
 };

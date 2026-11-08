@@ -65,12 +65,7 @@ import type { MarkStore } from './pdf/marks';
 import { PdfMarkOverlay } from './pdf/overlay';
 import { GlossSidebarView, VIEW_TYPE_GLOSS } from './pdf/sidebar';
 import type { PdfSidebarContext, PdfSidebarHost } from './pdf/sidebar';
-import {
-	captureWordSelection,
-	coversWholeSentence,
-	PAGE_SELECTOR,
-	selectSentenceInPdf,
-} from './pdf/wordSelection';
+import { captureWordSelection, coversWholeSentence, PAGE_SELECTOR } from './pdf/wordSelection';
 import { GlossSettingTab } from './ui/settingsTab';
 
 const SECRET_ID = 'interlinear-gloss-api-key';
@@ -452,25 +447,7 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 			this.sidebar.render();
 		}, 350);
 		this.registerDomEvent(document, 'selectionchange', onSelectionChange);
-		this.registerDomEvent(document, 'mouseup', this.onPdfDoubleClick, true);
-		this.registerDomEvent(document, 'dblclick', this.onPdfDoubleClick, true);
 	}
-
-	/**
-	 * Expand a double-clicked PDF word to its sentence before other mouseup
-	 * listeners (notably selection translators) read the selection.
-	 */
-	private onPdfDoubleClick = (event: MouseEvent): void => {
-		if (!this.settings.pdfMarkDoubleClickSentence) return;
-		if (event.type === 'mouseup' && event.detail < 2) return;
-		const target = event.target instanceof Element ? event.target : null;
-		if (!target?.closest('.textLayer') || !target.closest(PAGE_SELECTOR)) return;
-		const pdf = getActivePdfView(this.app);
-		if (!pdf) return;
-		if (!selectSentenceInPdf(pdf)) {
-			window.setTimeout(() => selectSentenceInPdf(pdf), 0);
-		}
-	};
 
 	/* ------------------------------------------------------------------ */
 	/* Settings                                                            */

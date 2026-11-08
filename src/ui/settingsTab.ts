@@ -567,18 +567,6 @@ export class GlossSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('双击扩选整句')
-			.setDesc(
-				'在 PDF 文本层双击一个词时，把可见选区从上一个句号扩到下一个句号，方便直接翻译整句。要标注单个词时改为拖选单词，或关掉此开关。',
-			)
-			.addToggle((toggle) =>
-				toggle.setValue(settings.pdfMarkDoubleClickSentence).onChange(async (value) => {
-					settings.pdfMarkDoubleClickSentence = value;
-					await this.persist();
-				}),
-			);
-
-		new Setting(containerEl)
 			.setName('标注写进 vault')
 			.setDesc(
 				'默认打开：写到 Glosses/pdf/<书名>-<短 hash>.marks.json，和段落词义记录分开。关闭则只存在 localStorage。',

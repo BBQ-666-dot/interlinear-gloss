@@ -310,40 +310,6 @@ function rangeForOffsets(doc: Document, chunks: TextChunk[], start: number, end:
 	return range;
 }
 
-/**
- * Expand the current PDF text selection to the sentence around it. Used by
- * the double-click handler so a word click is enough to select a whole
- * sentence for translation.
- */
-export function selectSentenceInPdf(view: PdfViewLike): string | null {
-	const selection = window.getSelection();
-	if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
-	const range = selection.getRangeAt(0);
-	if (!view.containerEl.contains(range.commonAncestorContainer)) return null;
-
-	const startPage = pageElementOf(range.startContainer);
-	const endPage = pageElementOf(range.endContainer) ?? startPage;
-	if (!startPage || !endPage || startPage !== endPage) return null;
-
-	const textRoot = startPage.querySelector<HTMLElement>('.textLayer');
-	if (!textRoot) return null;
-	const index = buildTextIndex(textRoot);
-	const start = absoluteOffset(index.chunks, range.startContainer, range.startOffset, 'start');
-	const end = absoluteOffset(index.chunks, range.endContainer, range.endOffset, 'end');
-	if (start < 0 || end <= start) return null;
-
-	const bounds = sentenceBounds(index.text, start, end);
-	const rebuilt = rangeForOffsets(startPage.ownerDocument, index.chunks, bounds.start, bounds.end);
-	if (!rebuilt) return null;
-	try {
-		selection.removeAllRanges();
-		selection.addRange(rebuilt);
-	} catch {
-		return null;
-	}
-	return normalizeSelectionText(index.text.slice(bounds.start, bounds.end));
-}
-
 interface LineBox {
 	top: number;
 	bottom: number;
