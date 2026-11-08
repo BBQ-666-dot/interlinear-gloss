@@ -100,6 +100,7 @@ export interface GlossSettings {
 	pdfMarkColor: MarkColor;
 	pdfMarkOpacity: number;
 	pdfMarkShowPos: boolean;
+	pdfMarkTranslateSentence: boolean;
 	pdfMarkCacheInVault: boolean;
 	pdfMarkCacheFolder: string;
 	pdfMarkMaxChars: number;
@@ -139,6 +140,10 @@ export interface PdfWordMark {
 	rects: NormalizedRect[];
 	quoteBefore: string;
 	quoteAfter: string;
+	/** Full sentence around the mark, captured when the mark is created. */
+	sentence?: string;
+	sentenceTranslation?: string;
+	sentenceModel?: string;
 	color: MarkColor;
 	labelMode?: MarkLabelMode;
 	model: string;
@@ -160,6 +165,7 @@ export interface PdfWordSelection {
 	rects: NormalizedRect[];
 	quoteBefore: string;
 	quoteAfter: string;
+	sentence: string;
 	/** CSS px relative to the page element. */
 	lineTop: number;
 	lineBottom: number;

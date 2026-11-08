@@ -125,6 +125,13 @@ export function sanitizeMark(value: unknown, pdfPath: string): PdfWordMark | nul
 		})),
 		quoteBefore: typeof raw.quoteBefore === 'string' ? raw.quoteBefore : '',
 		quoteAfter: typeof raw.quoteAfter === 'string' ? raw.quoteAfter : '',
+		...(typeof raw.sentence === 'string' && raw.sentence.trim() ? { sentence: raw.sentence.trim() } : {}),
+		...(typeof raw.sentenceTranslation === 'string' && raw.sentenceTranslation.trim()
+			? { sentenceTranslation: raw.sentenceTranslation.trim() }
+			: {}),
+		...(typeof raw.sentenceModel === 'string' && raw.sentenceModel.trim()
+			? { sentenceModel: raw.sentenceModel.trim() }
+			: {}),
 		color: raw.color === 'green' || raw.color === 'blue' || raw.color === 'pink' ? raw.color : 'yellow',
 		...(raw.labelMode === 'gap' ||
 		raw.labelMode === 'overlap' ||

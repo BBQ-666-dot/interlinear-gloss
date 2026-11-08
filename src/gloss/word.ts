@@ -1,6 +1,7 @@
 import type { GlossSettings } from '../types';
 import type { TranslationProvider } from '../providers/provider';
 import { resolveGlossary, glossaryPromptLines } from './glossary';
+import { buildTranslationPrompt } from './prompt';
 
 /**
  * Word-level translation for PDF marks. Deliberately separate from the
@@ -121,6 +122,59 @@ export function cleanWordTranslation(raw: string, maxChars = DEFAULT_MAX_CHARS):
 		text = cut > 1 ? head.slice(0, cut) : head;
 	}
 	return text;
+}
+
+/** Strip a translation-only model's preamble, fences and wrapping quotes. */
+export function cleanSentenceTranslation(raw: string): string {
+	let text = raw.replace(/\r\n?/g, '\n').trim();
+	const fenced = text.match(/^```[a-zA-Z]*\n([\s\S]*?)\n?```$/);
+	if (fenced) text = fenced[1].trim();
+	text = text
+		.replace(/【\s*译\s*文\s*】/g, '')
+		.replace(/^\s*(?:译文|翻译|Translation)\s*[:：]\s*/i, '')
+		.split('\n')
+		.map((line) => line.trim())
+		.filter(Boolean)
+		.join(' ')
+		.replace(/^[\s*`_>#-]+/, '')
+		.replace(/^["'“”‘’「」『』]+|["'“”‘’「」『』]+$/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+	return /[\u3400-\u9fff]/.test(text) ? text : '';
+}
+
+export async function translateSentence(
+	provider: TranslationProvider,
+	sentence: string,
+	settings: GlossSettings,
+	log?: { warn: (message: string, detail?: unknown) => void },
+): Promise<{ translation: string; model: string }> {
+	const model = settings.model;
+	const prompt = buildTranslationPrompt({
+		text: sentence,
+		sourceLang: 'en',
+		targetLang: settings.targetLang,
+		mode: settings.mode,
+		glossary: resolveGlossary(settings.customGlossary),
+		maxItems: 1,
+	});
+	const raw = await provider.chat({
+		model,
+		messages: [
+			{ role: 'system', content: '你是学术翻译助手，只输出简体中文译文。' },
+			{ role: 'user', content: prompt },
+		],
+		temperature: settings.temperature,
+		maxTokens: Math.min(settings.maxTokens, 512),
+		numCtx: settings.numCtx,
+		timeoutMs: Math.min(settings.requestTimeoutMs, 60000),
+	});
+	const translation = cleanSentenceTranslation(raw);
+	if (!translation) {
+		log?.warn('整句翻译为空', model);
+		throw new Error('整句翻译为空');
+	}
+	return { translation, model };
 }
 
 export async function translateWordInContext(

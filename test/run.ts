@@ -47,11 +47,18 @@ import {
 	marksPath,
 	parseMarkFile,
 } from '../src/pdf/marks';
-import { buildWordPrompt, cleanWordTranslation, translateWordInContext, wordModel } from '../src/gloss/word';
+import {
+	buildWordPrompt,
+	cleanSentenceTranslation,
+	cleanWordTranslation,
+	translateWordInContext,
+	wordModel,
+} from '../src/gloss/word';
 import {
 	expandToWordBounds,
 	hasPartialWord,
 	normalizeSelectionText,
+	sentenceAround,
 	separatorBetween,
 } from '../src/pdf/wordSelection';
 import type { App } from 'obsidian';
@@ -583,6 +590,29 @@ function testSelectionSnap(): void {
 
 	assertEqual('跨行选区合并为空格', normalizeSelectionText('corresponding\npolicy'), 'corresponding policy');
 	assertEqual('跨行连字符保留', normalizeSelectionText('correspond-\ning\npolicy'), 'correspond-ing policy');
+
+	const sentenceText = 'First sentence. The corresponding policy is better. Next one.';
+	const sentenceStart = sentenceText.indexOf('corresponding');
+	assertEqual(
+		'截取选中词所在整句',
+		sentenceAround(sentenceText, sentenceStart, sentenceStart + 'corresponding'.length),
+		'The corresponding policy is better.',
+	);
+	const abbreviation = 'This is e.g. the corresponding policy case. Next one.';
+	const abbreviationStart = abbreviation.indexOf('corresponding');
+	assertEqual(
+		'缩写句点不误切',
+		sentenceAround(abbreviation, abbreviationStart, abbreviationStart + 'corresponding'.length),
+		'This is e.g. the corresponding policy case.',
+	);
+	assertEqual('没有句号时返回全文', sentenceAround('a corresponding policy without stops', 2, 23), 'a corresponding policy without stops');
+	const tableTail = 'Each cell indicates the next state. a1 (upward) a2 (rightward) Table 1.1.';
+	const tableStart = tableTail.indexOf('next');
+	assertEqual(
+		'句号后接小写表格内容也在此截止',
+		sentenceAround(tableTail, tableStart, tableStart + 'next'.length),
+		'Each cell indicates the next state.',
+	);
 }
 
 /* ------------------------------------------------------------------ */
@@ -719,6 +749,10 @@ function testWordPrompt(): void {
 	assertEqual('去掉尾部词性标注', cleanWordTranslation('相关的（adj.）'), '相关的');
 	assertEqual('没有中文时返回空', cleanWordTranslation('correlated'), '');
 	assertEqual('空字符串返回空', cleanWordTranslation('   '), '');
+	assertEqual('整句去掉【译文】', cleanSentenceTranslation('【译文】\n对应的策略更好。'), '对应的策略更好。');
+	assertEqual('整句去掉前缀', cleanSentenceTranslation('译文：对应的策略更好。'), '对应的策略更好。');
+	assertEqual('整句保留多行内容', cleanSentenceTranslation('对应的\n策略更好。'), '对应的 策略更好。');
+	assertEqual('整句没有中文时返回空', cleanSentenceTranslation('corresponding policy'), '');
 	assert(
 		'超长释义截到 12 字以内',
 		cleanWordTranslation('非常非常长的一个释义超过十二个字的情况继续延伸').length <= 12,

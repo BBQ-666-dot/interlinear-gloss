@@ -31,6 +31,7 @@ export const DEFAULT_SETTINGS: GlossSettings = {
 	pdfMarkColor: 'yellow',
 	pdfMarkOpacity: 0.9,
 	pdfMarkShowPos: false,
+	pdfMarkTranslateSentence: true,
 	pdfMarkCacheInVault: true,
 	pdfMarkCacheFolder: 'Glosses/pdf',
 	pdfMarkMaxChars: 40,

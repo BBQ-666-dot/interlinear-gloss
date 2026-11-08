@@ -228,6 +228,13 @@ export class GlossSidebarView extends ItemView {
 				line.createSpan({ cls: 'ig-sb-mark-pos', text: mark.pos });
 			}
 
+			if (mark.sentenceTranslation) {
+				const sentence = row.createDiv({ cls: 'ig-sb-mark-sentence' });
+				sentence.createSpan({ cls: 'ig-sb-mark-sentence-label', text: '整句：' });
+				sentence.createSpan({ text: mark.sentenceTranslation });
+				if (mark.sentence) sentence.title = mark.sentence;
+			}
+
 			const tools = row.createDiv({ cls: 'ig-sb-tools' });
 			const locate = tools.createEl('button', { cls: 'ig-icon-btn', text: '定位' });
 			locate.addEventListener('click', () => this.host.locateMark(mark));

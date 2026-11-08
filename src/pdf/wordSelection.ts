@@ -54,6 +54,50 @@ export function normalizeSelectionText(input: string): string {
 		.trim();
 }
 
+/** Sentence-ending punctuation, optionally followed by a closing quote/bracket. */
+const SENTENCE_END = /[.!?]["'’)\]]?(?=\s|$)/g;
+
+/** Periods inside these are not sentence ends. */
+const ABBREVIATIONS = new Set([
+	'e.g', 'i.e', 'eg', 'ie', 'al', 'fig', 'figs', 'eq', 'eqs', 'sec', 'secs',
+	'ch', 'chs', 'vs', 'dr', 'mr', 'mrs', 'ms', 'prof', 'no', 'nos', 'ref',
+	'refs', 'cf', 'approx', 'vol', 'vols', 'ed', 'eds', 'pp', 'etc',
+]);
+
+function isAbbreviationPeriod(text: string, periodIndex: number): boolean {
+	const before = text.slice(Math.max(0, periodIndex - 24), periodIndex + 1);
+	const match = before.match(/([A-Za-z][A-Za-z.]*)\.$/);
+	return Boolean(match && ABBREVIATIONS.has(match[1].toLowerCase()));
+}
+
+/** Keep a full sentence, capped so a punctuation-free PDF line cannot explode. */
+export function sentenceAround(text: string, start: number, end: number, limit = 400): string {
+	const total = text.length;
+	const from = Math.max(0, Math.min(start, total));
+	const to = Math.max(from, Math.min(end, total));
+
+	let left = 0;
+	const before = text.slice(0, from);
+	SENTENCE_END.lastIndex = 0;
+	let match: RegExpExecArray | null;
+	while ((match = SENTENCE_END.exec(before)) !== null) {
+		if (match[0].startsWith('.') && isAbbreviationPeriod(before, match.index)) continue;
+		left = match.index + match[0].length;
+	}
+	if (from - left > limit) left = Math.max(0, from - limit);
+
+	let right = total;
+	SENTENCE_END.lastIndex = to;
+	while ((match = SENTENCE_END.exec(text)) !== null) {
+		if (match[0].startsWith('.') && isAbbreviationPeriod(text, match.index)) continue;
+		right = match.index + match[0].length;
+		break;
+	}
+	if (right - to > limit) right = Math.min(total, to + limit);
+
+	return normalizeSelectionText(text.slice(left, right));
+}
+
 /**
  * Grow `[start, end)` until it covers whole words on both ends. Interior
  * spaces stay untouched, so a phrase keeps its middle words intact while the
@@ -422,6 +466,10 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 		snappedEnd > 0
 			? normalizeSelectionText(index.text.slice(snappedEnd, snappedEnd + 48))
 			: '';
+	const sentence =
+		snappedStart >= 0 && snappedEnd > snappedStart
+			? sentenceAround(index.text, snappedStart, snappedEnd)
+			: normalizeSelectionText(`${quoteBefore}${text}${quoteAfter}`);
 
 	return {
 		ok: true,
@@ -431,6 +479,7 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 			rects,
 			quoteBefore,
 			quoteAfter,
+			sentence,
 			lineTop,
 			lineBottom,
 			nextLineTop: nextLine?.top ?? null,

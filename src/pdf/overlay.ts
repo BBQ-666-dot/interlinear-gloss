@@ -285,7 +285,7 @@ export class PdfMarkOverlay {
 			highlight.style.height = `${rect.h * 100}%`;
 			highlight.style.background = `rgba(${rgb}, ${0.35 * opacity})`;
 			highlight.dataset.markId = mark.id;
-			highlight.title = `${mark.text} — ${mark.translation}`;
+			highlight.title = `${mark.text} — ${mark.translation}${mark.sentenceTranslation ? `\n${mark.sentenceTranslation}` : ''}`;
 			if (this.hovered === mark.id) highlight.classList.add('is-hover');
 			layer.appendChild(highlight);
 		}
@@ -316,7 +316,7 @@ export class PdfMarkOverlay {
 		// Measure the text only: planLabel adds the padding back in.
 		label.style.padding = '0';
 		label.style.visibility = 'hidden';
-		label.title = `${mark.text} — ${mark.translation}`;
+		label.title = `${mark.text} — ${mark.translation}${mark.sentenceTranslation ? `\n${mark.sentenceTranslation}` : ''}`;
 		label.dataset.markId = mark.id;
 		layer.appendChild(label);
 		const measured = Math.max(12, label.getBoundingClientRect().width);

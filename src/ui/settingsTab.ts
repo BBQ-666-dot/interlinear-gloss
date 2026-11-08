@@ -479,6 +479,16 @@ export class GlossSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
+			.setName('标注时保存整句翻译')
+			.setDesc('每次标注词/短语时，用句子模型翻译它所在的整句，存进 .marks.json；右侧栏和编辑框可查看。关掉可省一次模型请求。')
+			.addToggle((toggle) =>
+				toggle.setValue(settings.pdfMarkTranslateSentence).onChange(async (value) => {
+					settings.pdfMarkTranslateSentence = value;
+					await this.persist();
+				}),
+			);
+
+		new Setting(containerEl)
 			.setName('释义显示方式')
 			.setDesc(
 				'hover（默认）：平时只有高亮，鼠标停在标注过的词上才冒出中文，不压任何正文。none：只高亮，不显示浮标。gap / overlap / margin：常驻标签，会占行间空隙或压到下一行。',

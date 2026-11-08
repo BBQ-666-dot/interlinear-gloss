@@ -18,7 +18,7 @@ import { consoleLogger } from './log';
 import { shortHash, normalizeForHash } from './cache/hash';
 import { generateGloss } from './gloss/engine';
 import type { GeneratedGloss } from './gloss/engine';
-import { translateWordInContext } from './gloss/word';
+import { translateSentence, translateWordInContext } from './gloss/word';
 import { applyAdjectiveSuffix, lookupOfflineWord } from './dictionary/offline';
 import { chooseOfflineSense } from './dictionary/sense';
 import { resolveGlossary } from './gloss/glossary';
@@ -135,6 +135,13 @@ class WordMarkModal extends Modal {
 			cls: 'ig-mark-meta',
 			text: `第 ${this.mark.page} 页${this.mark.pos ? ` · ${this.mark.pos}` : ''} · ${this.mark.model || '未知模型'}`,
 		});
+
+		if (this.mark.sentenceTranslation) {
+			const sentence = contentEl.createDiv({ cls: 'ig-mark-sentence' });
+			sentence.createDiv({ cls: 'ig-mark-sentence-label', text: '整句翻译' });
+			sentence.createDiv({ cls: 'ig-mark-sentence-text', text: this.mark.sentenceTranslation });
+			if (this.mark.sentence) sentence.title = this.mark.sentence;
+		}
 
 		const input = contentEl.createEl('input', {
 			cls: 'ig-mark-input',
@@ -1203,6 +1210,18 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 				}
 			}
 		}
+		let sentenceTranslation: string | undefined;
+		let sentenceModel: string | undefined;
+		if (this.settings.pdfMarkTranslateSentence && selection.sentence) {
+			try {
+				notice.setMessage('正在翻译整句…');
+				const full = await translateSentence(this.getProvider(), selection.sentence, this.settings, consoleLogger);
+				sentenceTranslation = full.translation;
+				sentenceModel = full.model;
+			} catch (error) {
+				consoleLogger.warn('整句翻译失败，词标注仍会保存', error);
+			}
+		}
 		notice.hide();
 
 		const now = Date.now();
@@ -1216,6 +1235,13 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 			rects: selection.rects,
 			quoteBefore: selection.quoteBefore,
 			quoteAfter: selection.quoteAfter,
+			...(sentenceTranslation
+				? {
+						sentence: selection.sentence,
+						sentenceTranslation,
+						...(sentenceModel ? { sentenceModel } : {}),
+					}
+				: {}),
 			color: this.settings.pdfMarkColor,
 			labelMode: this.settings.pdfMarkLabelMode,
 			model: result.model,
