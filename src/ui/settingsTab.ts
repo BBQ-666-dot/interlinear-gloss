@@ -567,17 +567,15 @@ export class GlossSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('选中内容字符上限')
-			.setDesc('超过这个长度就提示「请选一个词或短语」，避免把整句当单词翻译。')
-			.addSlider((slider) =>
-				slider
-					.setLimits(10, 80, 5)
-					.setValue(settings.pdfMarkMaxChars)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						settings.pdfMarkMaxChars = Math.round(value);
-						await this.persist();
-					}),
+			.setName('双击扩选整句')
+			.setDesc(
+				'在 PDF 文本层双击一个词时，把可见选区从上一个句号扩到下一个句号，方便直接翻译整句。要标注单个词时改为拖选单词，或关掉此开关。',
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(settings.pdfMarkDoubleClickSentence).onChange(async (value) => {
+					settings.pdfMarkDoubleClickSentence = value;
+					await this.persist();
+				}),
 			);
 
 		new Setting(containerEl)

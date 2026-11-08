@@ -32,9 +32,9 @@ export const DEFAULT_SETTINGS: GlossSettings = {
 	pdfMarkOpacity: 0.9,
 	pdfMarkShowPos: false,
 	pdfMarkTranslateSentence: true,
+	pdfMarkDoubleClickSentence: true,
 	pdfMarkCacheInVault: true,
 	pdfMarkCacheFolder: 'Glosses/pdf',
-	pdfMarkMaxChars: 40,
 };
 
 export const TARGET_LANG_LABEL: Record<string, string> = {
@@ -71,7 +71,6 @@ export function mergeSettings(raw: unknown): GlossSettings {
 	base.requestTimeoutMs = Math.min(300000, Math.max(5000, Math.round(base.requestTimeoutMs)));
 	base.pdfMarkFontScale = Math.min(2, Math.max(0.6, Number.isFinite(base.pdfMarkFontScale) ? base.pdfMarkFontScale : 1));
 	base.pdfMarkOpacity = Math.min(1, Math.max(0.2, Number.isFinite(base.pdfMarkOpacity) ? base.pdfMarkOpacity : 0.9));
-	base.pdfMarkMaxChars = Math.min(80, Math.max(10, Math.round(base.pdfMarkMaxChars)));
 	if (!['gap', 'overlap', 'margin', 'hover', 'none'].includes(base.pdfMarkLabelMode)) base.pdfMarkLabelMode = 'none';
 	if (!['yellow', 'green', 'blue', 'pink'].includes(base.pdfMarkColor)) base.pdfMarkColor = 'yellow';
 	if (!base.baseUrl.trim()) base.baseUrl = DEFAULT_SETTINGS.baseUrl;

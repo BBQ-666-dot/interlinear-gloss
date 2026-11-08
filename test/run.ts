@@ -55,6 +55,7 @@ import {
 	wordModel,
 } from '../src/gloss/word';
 import {
+	coversWholeSentence,
 	expandToWordBounds,
 	hasPartialWord,
 	normalizeSelectionText,
@@ -597,6 +598,14 @@ function testSelectionSnap(): void {
 		'截取选中词所在整句',
 		sentenceAround(sentenceText, sentenceStart, sentenceStart + 'corresponding'.length),
 		'The corresponding policy is better.',
+	);
+	assert(
+		'整句选区被识别',
+		coversWholeSentence('The corresponding policy is better', 'The corresponding policy is better.'),
+	);
+	assert(
+		'单词不会误判为整句',
+		!coversWholeSentence('corresponding', 'The corresponding policy is better.'),
 	);
 	const abbreviation = 'This is e.g. the corresponding policy case. Next one.';
 	const abbreviationStart = abbreviation.indexOf('corresponding');

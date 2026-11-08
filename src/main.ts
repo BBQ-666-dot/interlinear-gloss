@@ -65,7 +65,12 @@ import type { MarkStore } from './pdf/marks';
 import { PdfMarkOverlay } from './pdf/overlay';
 import { GlossSidebarView, VIEW_TYPE_GLOSS } from './pdf/sidebar';
 import type { PdfSidebarContext, PdfSidebarHost } from './pdf/sidebar';
-import { captureWordSelection, PAGE_SELECTOR } from './pdf/wordSelection';
+import {
+	captureWordSelection,
+	coversWholeSentence,
+	PAGE_SELECTOR,
+	selectSentenceInPdf,
+} from './pdf/wordSelection';
 import { GlossSettingTab } from './ui/settingsTab';
 
 const SECRET_ID = 'interlinear-gloss-api-key';
@@ -447,7 +452,25 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 			this.sidebar.render();
 		}, 350);
 		this.registerDomEvent(document, 'selectionchange', onSelectionChange);
+		this.registerDomEvent(document, 'mouseup', this.onPdfDoubleClick, true);
+		this.registerDomEvent(document, 'dblclick', this.onPdfDoubleClick, true);
 	}
+
+	/**
+	 * Expand a double-clicked PDF word to its sentence before other mouseup
+	 * listeners (notably selection translators) read the selection.
+	 */
+	private onPdfDoubleClick = (event: MouseEvent): void => {
+		if (!this.settings.pdfMarkDoubleClickSentence) return;
+		if (event.type === 'mouseup' && event.detail < 2) return;
+		const target = event.target instanceof Element ? event.target : null;
+		if (!target?.closest('.textLayer') || !target.closest(PAGE_SELECTOR)) return;
+		const pdf = getActivePdfView(this.app);
+		if (!pdf) return;
+		if (!selectSentenceInPdf(pdf)) {
+			window.setTimeout(() => selectSentenceInPdf(pdf), 0);
+		}
+	};
 
 	/* ------------------------------------------------------------------ */
 	/* Settings                                                            */
@@ -1147,11 +1170,32 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 			return;
 		}
 
-		const notice = new Notice(`正在查「${selection.text}」…`, 0);
+		const notice = new Notice(`正在查「${selection.text.slice(0, 24)}」…`, 0);
 		let result: { translation: string; model: string; pos?: string } | null = null;
+		let sentenceTranslation: string | undefined;
+		let sentenceModel: string | undefined;
+		const sentenceMode =
+			this.settings.pdfMarkTranslateSentence &&
+			Boolean(selection.sentence) &&
+			coversWholeSentence(selection.text, selection.sentence);
+
+		if (sentenceMode) {
+			try {
+				notice.setMessage('正在翻译整句…');
+				const full = await translateSentence(this.getProvider(), selection.sentence, this.settings, consoleLogger);
+				result = { translation: full.translation, model: '整句' };
+				sentenceTranslation = full.translation;
+				sentenceModel = full.model;
+			} catch (error) {
+				consoleLogger.warn('整句翻译失败，改用词/短语兜底', error);
+			}
+		}
+
 		const glossary = resolveGlossary(this.settings.customGlossary);
 		const glossaryHit = glossary[selection.text.trim().toLowerCase()];
-		if (glossaryHit) {
+		if (result) {
+			// Whole-sentence selection already has its translation.
+		} else if (glossaryHit) {
 			result = { translation: glossaryHit, model: '术语表' };
 		} else {
 			const offline = this.settings.offlineDictionaryEnabled ? lookupOfflineWord(selection.text) : null;
@@ -1210,9 +1254,7 @@ export default class InterlinearGlossPlugin extends Plugin implements PdfSidebar
 				}
 			}
 		}
-		let sentenceTranslation: string | undefined;
-		let sentenceModel: string | undefined;
-		if (this.settings.pdfMarkTranslateSentence && selection.sentence) {
+		if (!sentenceMode && this.settings.pdfMarkTranslateSentence && selection.sentence) {
 			try {
 				notice.setMessage('正在翻译整句…');
 				const full = await translateSentence(this.getProvider(), selection.sentence, this.settings, consoleLogger);

@@ -70,8 +70,13 @@ function isAbbreviationPeriod(text: string, periodIndex: number): boolean {
 	return Boolean(match && ABBREVIATIONS.has(match[1].toLowerCase()));
 }
 
-/** Keep a full sentence, capped so a punctuation-free PDF line cannot explode. */
-export function sentenceAround(text: string, start: number, end: number, limit = 400): string {
+export interface SentenceBounds {
+	start: number;
+	end: number;
+}
+
+/** Offsets from the previous sentence-ending period to the next one. */
+export function sentenceBounds(text: string, start: number, end: number, limit = 400): SentenceBounds {
 	const total = text.length;
 	const from = Math.max(0, Math.min(start, total));
 	const to = Math.max(from, Math.min(end, total));
@@ -95,7 +100,22 @@ export function sentenceAround(text: string, start: number, end: number, limit =
 	}
 	if (right - to > limit) right = Math.min(total, to + limit);
 
-	return normalizeSelectionText(text.slice(left, right));
+	return { start: left, end: right };
+}
+
+/** Keep a full sentence, capped so a punctuation-free PDF line cannot explode. */
+export function sentenceAround(text: string, start: number, end: number, limit = 400): string {
+	const bounds = sentenceBounds(text, start, end, limit);
+	return normalizeSelectionText(text.slice(bounds.start, bounds.end));
+}
+
+/** True when the selection covers most of the surrounding sentence. */
+export function coversWholeSentence(text: string, sentence: string): boolean {
+	const selected = normalizeSelectionText(text);
+	const full = normalizeSelectionText(sentence);
+	if (!selected || !full) return false;
+	const words = selected.split(/\s+/).filter(Boolean).length;
+	return words >= 3 && selected.length / full.length >= 0.7;
 }
 
 /**
@@ -290,6 +310,40 @@ function rangeForOffsets(doc: Document, chunks: TextChunk[], start: number, end:
 	return range;
 }
 
+/**
+ * Expand the current PDF text selection to the sentence around it. Used by
+ * the double-click handler so a word click is enough to select a whole
+ * sentence for translation.
+ */
+export function selectSentenceInPdf(view: PdfViewLike): string | null {
+	const selection = window.getSelection();
+	if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+	const range = selection.getRangeAt(0);
+	if (!view.containerEl.contains(range.commonAncestorContainer)) return null;
+
+	const startPage = pageElementOf(range.startContainer);
+	const endPage = pageElementOf(range.endContainer) ?? startPage;
+	if (!startPage || !endPage || startPage !== endPage) return null;
+
+	const textRoot = startPage.querySelector<HTMLElement>('.textLayer');
+	if (!textRoot) return null;
+	const index = buildTextIndex(textRoot);
+	const start = absoluteOffset(index.chunks, range.startContainer, range.startOffset, 'start');
+	const end = absoluteOffset(index.chunks, range.endContainer, range.endOffset, 'end');
+	if (start < 0 || end <= start) return null;
+
+	const bounds = sentenceBounds(index.text, start, end);
+	const rebuilt = rangeForOffsets(startPage.ownerDocument, index.chunks, bounds.start, bounds.end);
+	if (!rebuilt) return null;
+	try {
+		selection.removeAllRanges();
+		selection.addRange(rebuilt);
+	} catch {
+		return null;
+	}
+	return normalizeSelectionText(index.text.slice(bounds.start, bounds.end));
+}
+
 interface LineBox {
 	top: number;
 	bottom: number;
@@ -336,7 +390,7 @@ export function collectLineBoxes(page: HTMLElement): LineBox[] {
 	return merged;
 }
 
-export function captureWordSelection(view: PdfViewLike, settings: GlossSettings): CaptureResult {
+export function captureWordSelection(view: PdfViewLike, _settings: GlossSettings): CaptureResult {
 	const selection = window.getSelection();
 	if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
 		return { ok: false, message: '先在 PDF 里选中一个单词或短语' };
@@ -422,11 +476,6 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 		// instead of saving half a word again.
 		return { ok: false, message: '没能取到完整单词，请重新选一次（双击词的中间更稳）' };
 	}
-	const limit = Math.max(10, Math.min(80, settings.pdfMarkMaxChars));
-	if (Array.from(text).length > limit) {
-		return { ok: false, message: `请选一个词或短语（不超过 ${limit} 个字符）` };
-	}
-
 	const pageRect = startPage.getBoundingClientRect();
 	const snappedRects = Array.from(snappedRange.getClientRects()).filter(
 		(rect) => rect.width > 0.5 && rect.height > 0.5,
