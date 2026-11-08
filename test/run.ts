@@ -48,7 +48,12 @@ import {
 	parseMarkFile,
 } from '../src/pdf/marks';
 import { buildWordPrompt, cleanWordTranslation, translateWordInContext, wordModel } from '../src/gloss/word';
-import { expandToWordBounds, hasPartialWord, separatorBetween } from '../src/pdf/wordSelection';
+import {
+	expandToWordBounds,
+	hasPartialWord,
+	normalizeSelectionText,
+	separatorBetween,
+} from '../src/pdf/wordSelection';
 import type { App } from 'obsidian';
 import type { GlossBlockData, GlossItem, PdfGlossRecord, PdfWordMark } from '../src/types';
 
@@ -575,6 +580,9 @@ function testSelectionSnap(): void {
 
 	const lineBreak = expandToWordBounds('chapters\nare highly', 0, 'chapters\n'.length);
 	assertEqual('换行阻止扩到下一行', 'chapters\nare highly'.slice(lineBreak.start, lineBreak.end), 'chapters');
+
+	assertEqual('跨行选区合并为空格', normalizeSelectionText('corresponding\npolicy'), 'corresponding policy');
+	assertEqual('跨行连字符保留', normalizeSelectionText('correspond-\ning\npolicy'), 'correspond-ing policy');
 }
 
 /* ------------------------------------------------------------------ */

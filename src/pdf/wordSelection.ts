@@ -44,7 +44,7 @@ export function pageTextOf(page: HTMLElement | null): string {
 	return (layer.textContent ?? '').replace(/\u00ad/g, '').replace(/\s+/g, ' ').trim();
 }
 
-function normalizeSelectionText(input: string): string {
+export function normalizeSelectionText(input: string): string {
 	return input
 		.replace(/\u00ad/g, '')
 		.replace(/\r\n?/g, '\n')
@@ -322,6 +322,11 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 	const rawStart = absoluteOffset(index.chunks, range.startContainer, range.startOffset, 'start');
 	const rawEnd = absoluteOffset(index.chunks, range.endContainer, range.endOffset, 'end');
 	const rawText = normalizeSelectionText(range.toString());
+	const rawLineTops = new Set(
+		Array.from(range.getClientRects())
+			.filter((rect) => rect.width > 0.5 && rect.height > 0.5)
+			.map((rect) => Math.round(rect.top / 2)),
+	);
 	let snappedRange: Range = range;
 	let snappedStart = rawStart;
 	let snappedEnd = rawEnd;
@@ -331,7 +336,12 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 		// points still stretch across a space (pdf.js sometimes reports the end
 		// point at the start of the next span), keep only the word under the
 		// caret instead of marking "contain tan".
-		if (rawText && !/\s/.test(rawText) && /\s/.test(index.text.slice(bounds.start, bounds.end))) {
+		if (
+			rawText &&
+			!/\s/.test(rawText) &&
+			rawLineTops.size <= 1 &&
+			/\s/.test(index.text.slice(bounds.start, bounds.end))
+		) {
 			let from = rawStart;
 			let to = rawEnd;
 			while (from > bounds.start && WORD_CHARS.test(index.text.charAt(from - 1))) from -= 1;
@@ -353,7 +363,15 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 		}
 	}
 
-	const text = normalizeSelectionText(snappedRange.toString());
+	// Use the indexed text, not Range.toString(): pdf.js renders lines as
+	// separate absolutely-positioned spans, so the DOM range often concatenates
+	// the end of one line with the start of the next ("policyThe"). The index
+	// inserts a separator from the spans' geometry, which keeps multi-line
+	// phrases translatable.
+	const text =
+		snappedStart >= 0 && snappedEnd > snappedStart
+			? normalizeSelectionText(index.text.slice(snappedStart, snappedEnd))
+			: normalizeSelectionText(snappedRange.toString());
 	if (!text) return { ok: false, message: '选区是空的' };
 	if (snappedStart >= 0 && hasPartialWord(index.text, snappedStart, snappedEnd)) {
 		// Snapping could not reach the boundary (unusual span order): refuse
@@ -376,14 +394,6 @@ export function captureWordSelection(view: PdfViewLike, settings: GlossSettings)
 		height: rect.height,
 	}));
 	if (!rawRects.length) return { ok: false, message: '没量到选区的坐标，换个位置再试' };
-	// A single word must not silently become a two-line phrase. The text index
-	// normally inserts a line break, but this also catches pdf.js layouts where
-	// the whole line is one text node and no separator can be inferred.
-	const lineTops = new Set(snappedRects.map((rect) => Math.round(rect.top / 2)));
-	if (rawText && !/\s/.test(rawText) && lineTops.size > 1) {
-		return { ok: false, message: '选区跨到了下一行，请只选一个词或短语' };
-	}
-
 	const rects = normalizeRects(rawRects, pageRect.left, pageRect.top, {
 		width: pageRect.width,
 		height: pageRect.height,
