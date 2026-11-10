@@ -1,11 +1,10 @@
 {
-	"id": "interlinear-gloss",
-	"name": "Interlinear Gloss",
-	"version": "0.4.9",
-	"minAppVersion": "1.5.0",
-	"description": "选中英文句子或段落，生成中文译文与关键词释义，永久保存在原文下方；PDF 用右侧栏加 sidecar 缓存。",
-	"author": "bbq25",
-	"authorUrl": "",
-	"isDesktopOnly": false
+  "id": "interlinear-gloss",
+  "name": "Interlinear Gloss",
+  "version": "0.4.10",
+  "minAppVersion": "1.5.0",
+  "description": "Local-first bilingual reading for Obsidian: persistent translations, keyword glosses, PDF word highlights, offline ECDICT lookup, and local Ollama support.",
+  "author": "bbq25",
+  "authorUrl": "https://github.com/BBQ-666-dot",
+  "isDesktopOnly": false
 }
-
