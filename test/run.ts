@@ -30,6 +30,7 @@ import {
 	canonicalRects,
 	denormalizeRect,
 	lineHeightFor,
+	mergeLineRects,
 	normalizeRect,
 	normalizeRects,
 	overlapRatio,
@@ -443,6 +444,14 @@ function testGeometry(): void {
 		JSON.stringify(back),
 	);
 	assertEqual('canonicalRects 与顺序无关地稳定', canonicalRects([norm]), canonicalRects([{ ...norm }]));
+	const mergedRects = mergeLineRects([
+		{ x: 0.1, y: 0.1, w: 0.08, h: 0.02 },
+		{ x: 0.18, y: 0.101, w: 0.06, h: 0.02 },
+		{ x: 0.1, y: 0.14, w: 0.2, h: 0.02 },
+	]);
+	assertEqual('同一行矩形合并为一块', mergedRects.length, 2);
+	assertEqual('合并后的左边界', mergedRects[0].x, 0.1);
+	assertEqual('合并后的宽度', mergedRects[0].w, 0.14);
 	assertEqual(
 		'零宽选区被丢弃',
 		normalizeRects([{ left: 0, top: 0, width: 0, height: 3 }, rect], 0, 0, PAGE).length,

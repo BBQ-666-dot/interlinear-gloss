@@ -91,6 +91,44 @@ export function normalizeRects(rects: PixelRect[], pageLeft: number, pageTop: nu
 		.map((rect) => normalizeRect(rect, pageLeft, pageTop, page));
 }
 
+/**
+ * pdf.js often returns several rects per line (one per span, plus inline math).
+ * Painting each one at 35% opacity produces the stacked/striped highlight seen
+ * on whole-sentence marks. Union all rects whose centers sit on the same line.
+ */
+export function mergeLineRects(rects: NormalizedRect[]): NormalizedRect[] {
+	if (rects.length < 2) return rects.map((rect) => ({ ...rect }));
+	const heights = rects.map((rect) => rect.h).sort((a, b) => a - b);
+	const medianHeight = heights[Math.floor(heights.length / 2)] || 0.01;
+	const tolerance = Math.max(0.004, medianHeight * 0.6);
+	const groups: Array<{ rect: NormalizedRect; center: number }> = [];
+
+	for (const rect of [...rects].sort((a, b) => a.y + a.h / 2 - (b.y + b.h / 2) || a.x - b.x)) {
+		const center = rect.y + rect.h / 2;
+		const group = groups.find((item) => Math.abs(item.center - center) <= tolerance);
+		if (!group) {
+			groups.push({ rect: { ...rect }, center });
+			continue;
+		}
+		const right = Math.max(group.rect.x + group.rect.w, rect.x + rect.w);
+		const bottom = Math.max(group.rect.y + group.rect.h, rect.y + rect.h);
+		group.rect.x = Math.min(group.rect.x, rect.x);
+		group.rect.y = Math.min(group.rect.y, rect.y);
+		group.rect.w = right - group.rect.x;
+		group.rect.h = bottom - group.rect.y;
+		group.center = group.rect.y + group.rect.h / 2;
+	}
+
+	return groups
+		.map((item) => ({
+			x: roundTo(item.rect.x),
+			y: roundTo(item.rect.y),
+			w: roundTo(item.rect.w),
+			h: roundTo(item.rect.h),
+		}))
+		.sort((a, b) => a.y - b.y || a.x - b.x);
+}
+
 export function denormalizeRect(rect: NormalizedRect, page: BoxSize): PixelRect {
 	return {
 		left: rect.x * page.width,

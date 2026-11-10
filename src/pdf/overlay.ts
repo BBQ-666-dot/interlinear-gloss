@@ -3,6 +3,7 @@ import type { PdfViewLike } from './adapter';
 import {
 	clamp,
 	denormalizeRect,
+	mergeLineRects,
 	overlapRatio,
 	planLabel,
 	resolveCollisions,
@@ -272,17 +273,27 @@ export class PdfMarkOverlay {
 		settings: GlossSettings,
 	): PaintedLabel | null {
 		const pageRect = page.getBoundingClientRect();
+		const layerRect = layer.getBoundingClientRect();
+		const layerOffsetX = layerRect.left - pageRect.left;
+		const layerOffsetY = layerRect.top - pageRect.top;
 		const mode = settings.pdfMarkLabelMode;
 		const rgb = COLORS[mark.color] ?? COLORS.yellow;
 		const opacity = clamp(settings.pdfMarkOpacity, 0.2, 1);
 
-		for (const rect of mark.rects) {
+		for (const rect of mergeLineRects(mark.rects)) {
+			const left = rect.x * pageRect.width - layerOffsetX;
+			const top = rect.y * pageRect.height - layerOffsetY;
+			const width = rect.w * pageRect.width;
+			const rawHeight = rect.h * pageRect.height;
+			const centerY = pageRect.top + rect.y * pageRect.height + rawHeight / 2;
+			const line = geometry.lines.find((item) => centerY >= item.top - 1 && centerY <= item.bottom + 1);
+			const glyphHeight = line?.fontSize && line.fontSize > 0 ? Math.min(rawHeight, line.fontSize) : rawHeight;
 			const highlight = document.createElement('div');
 			highlight.className = 'ig-pdf-mark';
-			highlight.style.left = `${rect.x * 100}%`;
-			highlight.style.top = `${rect.y * 100}%`;
-			highlight.style.width = `${rect.w * 100}%`;
-			highlight.style.height = `${rect.h * 100}%`;
+			highlight.style.left = `${left}px`;
+			highlight.style.top = `${top + (rawHeight - glyphHeight) / 2}px`;
+			highlight.style.width = `${width}px`;
+			highlight.style.height = `${glyphHeight}px`;
 			highlight.style.background = `rgba(${rgb}, ${0.35 * opacity})`;
 			highlight.dataset.markId = mark.id;
 			highlight.title = `${mark.text} — ${mark.translation}${mark.sentenceTranslation ? `\n${mark.sentenceTranslation}` : ''}`;
