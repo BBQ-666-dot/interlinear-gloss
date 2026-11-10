@@ -3,10 +3,26 @@
 [![Release](https://img.shields.io/github/v/release/BBQ-666-dot/interlinear-gloss)](https://github.com/BBQ-666-dot/interlinear-gloss/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-在 Obsidian 里读英文教材时，选中一句话或一段话，一次性生成**中文译文 + 关键词释义**，永久保存在原文下方。不联网、不重复请求模型；关掉 Ollama 也能继续读已经生成过的内容。
+**在 Obsidian 里把英文教材和论文读成双语：选中一段，永久保存中文译文 + 关键词释义；PDF 里选中单词就地高亮，离线词典优先，AI 只负责从候选义项里选。**
 
-- Markdown 笔记：生成 ```` ```gloss ```` 代码块，插在原文段落下面（便携模式则插原生表格）
-- PDF：右侧栏生成词义卡片，缓存到 sidecar JSON；在正文里选一个词，还能就地加**词级标注**（高亮 + 词下中文标签）
+**Interlinear Gloss** turns Obsidian into a local-first bilingual reading workspace. It keeps sentence translations and word glosses in your notes, adds word-level PDF highlights, and uses a bundled ECDICT dictionary plus local Ollama models. No cloud API required.
+
+**适合谁**：读英文教材、论文、技术文档，想保留上下文又不想反复切翻译软件的人；需要做精读笔记、术语积累、PDF 生词标注的人；希望数据留在本地、不把整本书发给云端的人。
+
+**它解决的不是“翻译一下”，而是“读下去”**：
+
+- 选中即译，译文和词义**写回笔记**；下次打开不重新请求模型。
+- 词义优先查**内置 ECDICT**（约 3.7 万词，MIT）；多义词只让模型在候选里选编号，查不到才走模型兜底。
+- PDF 是**词级标注**，不是整页重排：高亮 + 悬停标签，跨行短语和整句也能标；高亮按行合并，不叠条纹。
+- **本地优先**：Ollama + 离线词典，默认不需要云 API；模型、缓存、标注位置都能自己控制。
+- 兼容 Markdown 阅读视图、PDF 侧栏、BRAT 安装；MIT 开源。
+
+## 安装
+
+1. 从 [Releases](https://github.com/BBQ-666-dot/interlinear-gloss/releases) 下载最新的 `manifest.json`、`main.js`、`styles.css`。
+2. 放进 `<vault>/.obsidian/plugins/interlinear-gloss/`（没有文件夹就新建）。
+3. 在「设置 → 第三方插件」里启用 **Interlinear Gloss**。
+4. 或者把仓库地址加进 [BRAT](https://github.com/TfTHacker/obsidian42-brat) 安装。
 
 ## 使用
 
@@ -66,7 +82,7 @@ ollama pull qwen2.5:3b
 
 便携模式用 `<!-- ig-gloss:<hash> -->` / `<!-- /ig-gloss -->` 两个不可见注释包住表格，所以预览里不显示、插件仍能定位和重新生成。
 
-## PDF 词级标注（0.3.0）
+## PDF 词级标注
 
 在 PDF 里选中一个英文单词或短语（长度不限），执行「标注 PDF 选中词」（或侧栏的「标注选中词」）：
 
@@ -157,16 +173,9 @@ API Key 走 `app.secretStorage`（系统钥匙串），不写进 `data.json`。
 ```powershell
 npm install
 npm run build      # → main.js
-npm test           # 156 项自测 + 真实 Ollama 集成测试（IG_OFFLINE=1 跳过模型用例）
+npm test           # 175 项自测 + 真实 Ollama 集成测试（IG_OFFLINE=1 跳过模型用例）
 npm run typecheck
 ```
-
-安装：
-
-1. 从 [Releases](https://github.com/BBQ-666-dot/interlinear-gloss/releases) 下载最新的 `manifest.json`、`main.js`、`styles.css`。
-2. 放进 `<vault>/.obsidian/plugins/interlinear-gloss/`。
-3. 在「设置 → 第三方插件」里启用 Interlinear Gloss。
-4. 也可以把仓库地址加进 BRAT 安装。
 
 ## 已知限制
 
